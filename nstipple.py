@@ -242,7 +242,7 @@ if __name__== "__main__":
 	plt.axis("off")
 	plt.imshow(new_resolution/255)
 	plt.show()
-	mpimg.imsave('dot3_big_intensity1', new_resolution/255)
+	mpimg.imsave('dot3_big_intensity1223', new_resolution/255)
 	
 		
 
