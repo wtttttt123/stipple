@@ -65,11 +65,11 @@ def calculate_priority_depth(pixel,loc,edge_list):
 # 		for y in range(edges.shape[1]):
 # 			z[x,y,:]=edges[x,y]
 # 	return z
-	# plt.subplot(121),plt.imshow(img,cmap = 'gray')
-	# plt.title('Original Image'), plt.xticks([]), plt.yticks([])
-	# plt.subplot(122),plt.imshow(edges,cmap = 'gray')
-	# plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
-	# plt.show()
+# 	plt.subplot(121),plt.imshow(img,cmap = 'gray')
+# 	plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+# 	plt.subplot(122),plt.imshow(edges,cmap = 'gray')
+# 	plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+# 	plt.show()
 
 
 # def edge_heap(depth_map):
@@ -163,24 +163,30 @@ def SAS(G0,G1,k,D,img):
 def error_diffusion(loc,errorxy,R,G0,G1,k,D,img):
 	sxy=sh_ex(errorxy,R,G0,G1)
 	wtotal=0
-	# error0=(Astipple-Apixcel)*k
-	error0=0
+	Astipple=0
+	for i in range(-int(R*dot),int(R*dot)+1):
+		for j in range(-int(R*dot),int(R*dot)+1):
+			if (i**2+j**2)**0.5<R*dot:
+				Astipple+=1
+	Apixcel=1
+	error0=(Astipple-Apixcel)*k
+	# error0=0
 	# calculate_total weight
-	for i in [x for x in range(-D//2+1,D//2+1) if x!=0]:
-		for j in [x for x in range(-D//2+1,D//2+1) if x!=0]:
-			if 0<=loc[0]+i<img.shape[0] and 0<=loc[1]+j<img.shape[1]:
-				if (not M[(loc[0]+i,loc[1]+j)]) and sqrt(i**2+j**2)<D//2:
-					rmn=sqrt(i**2+j**2)
+	for i in [x for x in range(-D//2+1,D//2+1) ]:
+		for j in [y for y in range(-D//2+1,D//2+1)]:
+			if 0<=loc[0]+i<img.shape[0] and 0<=loc[1]+j<img.shape[1] and abs(i)+abs(j)!=0:
+				if (not M[(loc[0]+i,loc[1]+j)]) and (i**2+j**2)**0.5<D/2:
+					rmn=(i**2+j**2)**0.5
 					wmn=calculate_weight(loc,img,errorxy,rmn,i,j)
 					wtotal+=wmn
 	
 	# modifty signle pixel's intensity
-	for i in [x for x in range(-D//2+1,D//2+1) if x!=0]:
-		for j in[x for x in range(-D//2+1,D//2+1) if x!=0]:
-			if 0<=loc[0]+i<img.shape[0] and 0<=loc[1]+j<img.shape[1]:
-				if (not M[(loc[0]+i,loc[1]+j)])and sqrt(i**2+j**2)<D//2:
+	for i in [x for x in range(-D//2+1,D//2+1)]:
+		for j in[y for y in range(-D//2,D//2+1)]:
+			if 0<=loc[0]+i<img.shape[0] and 0<=loc[1]+j<img.shape[1]and abs(i)+abs(j)!=0:
+				if (not M[(loc[0]+i,loc[1]+j)]) and (i**2+j**2)**0.5<D/2:
 					iimn=img[loc[0]+i,loc[1]+j,0]
-					rmn=sqrt(i**2+j**2)
+					rmn=(i**2+j**2)**0.5
 					wmn=calculate_weight(loc,img,errorxy,rmn,i,j)
 					if wtotal!=0:
 						Nwmn=wmn/wtotal
@@ -195,7 +201,6 @@ def calculate_weight(loc,img,errorxy,rmn,i,j):
 		wmn=(img[loc[0]+i,loc[1]+j,0])/(rmn**2)
 	else:
 		wmn=(255-img[loc[0]+i,loc[1]+j,0])/(rmn**2)
-	# print(img[loc[0]+i,loc[1]+j,0])
 	return wmn
 
 
@@ -206,43 +211,52 @@ def sh_ex(errorxy,Rsize,Gamma0,Gamma1):
 		sxy=(Rsize)**Gamma1
 	return sxy
 
-
-
-
-
-
-
-
-
-
   
 if __name__== "__main__":
-	man = mpimg.imread('man.png')
-	# man = mpimg.imread('im2.png')
+	# man = mpimg.imread('man.png')
+	man = mpimg.imread('im2.png')
 	deep = cv.imread('disp2.png',0)
+	# edges(deep)
+
+	# edges = cv.Canny(img,100,200)
+	# z = np.zeros((edges.shape[0],edges.shape[1],3))
+	# for x in range(edges.shape[0]):
+	# 	for y in range(edges.shape[1]):
+	# 		z[x,y,:]=edges[x,y]
+	# return z
+	# plt.subplot(121),plt.imshow(img,cmap = 'gray')
+	# plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+	# plt.subplot(122),plt.imshow(edges,cmap = 'gray')
+	# plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+	# plt.show()
+
 	man255=man*255
 	M={}
+	dot=2
+	resolution=5
+
 	# man255=np.maximum(z, man255)
 	# plt.imshow(man255/255)
 	# plt.show()
-	stippleimg=SAS(5,5,0,7,man255)
-	# stippleimg=SASD(5,5,0,7,man255,deep)
-	# stippleimg=SAS(10,10,0,15,man255,depth)
-	dot=3
-	resolution=5
+	# stippleimg=SAS(5,5,0,7,man255)
+	stippleimg=SASD(5,5,0,7,man255,deep)
+	# stippleimg=SASD(10,10,0,15,man255,depth)
 	new_resolution=np.ones((man255.shape[0]*resolution,man255.shape[1]*resolution,3))*255
 	for key, R in stippleimg.items():
 		a,b=key[0],key[1]
 		new_resolution[a*resolution,b*resolution,:]=(0,0,0);
 		for i in range(-int(R*dot),int(R*dot)+1):
 			for j in range(-int(R*dot),int(R*dot)+1):
-				if sqrt(i**2+j**2)<R*dot:
+				if (i**2+j**2)**0.5<=R*dot:
 					new_resolution[min(new_resolution.shape[0]-1,a*resolution+i),min(new_resolution.shape[1]-1,b*resolution+j),:]=(0,0,0)
 	
 	plt.axis("off")
 	plt.imshow(new_resolution/255)
 	plt.show()
-	mpimg.imsave('dot3_big_intensity12234546', new_resolution/255)
+	mpimg.imsave('room', new_resolution/255)
 	
-		
+	# plt.axis("off")
+	# plt.imshow(man255/255)
+	# plt.show()
+	# mpimg.imsave('255_man', man255/255)
 
