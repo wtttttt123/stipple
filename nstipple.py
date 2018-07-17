@@ -227,14 +227,14 @@ if __name__== "__main__":
 	# stippleimg=SAS(5,5,0,7,man255)
 	stippleimg=SASD(5,5,0,7,man255,deep)
 	# stippleimg=SASD(10,10,0,15,man255,depth)
-	new_resolution=np.ones((man255.shape[0]*resolution,man255.shape[1]*resolution,4))*255
+	new_resolution=np.ones((man255.shape[0]*resolution,man255.shape[1]*resolution,3))*255
 	for key, R in stippleimg.items():
 		a,b=key[0],key[1]
-		new_resolution[a*resolution,b*resolution,:]=(0,0,0,1);
+		new_resolution[a*resolution,b*resolution,:]=(0,0,0);
 		for i in range(-int(R*dot),int(R*dot)+1):
 			for j in range(-int(R*dot),int(R*dot)+1):
 				if (i**2+j**2)**0.5<=R*dot:
-					new_resolution[min(new_resolution.shape[0]-1,a*resolution+i),min(new_resolution.shape[1]-1,b*resolution+j),:]=(0,0,0,1)
+					new_resolution[min(new_resolution.shape[0]-1,a*resolution+i),min(new_resolution.shape[1]-1,b*resolution+j),:]=(0,0,0)
 	
 	plt.axis("off")
 	plt.imshow(new_resolution/255)
