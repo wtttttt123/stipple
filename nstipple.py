@@ -214,8 +214,8 @@ def sh_ex(errorxy,Rsize,Gamma0,Gamma1):
   
 if __name__== "__main__":
 	# man = mpimg.imread('man.png')
-	man = mpimg.imread('im2.png')
-	deep = cv.imread('disp2.png',0)
+	man = mpimg.imread('im7.png')
+	deep = cv.imread('disp7.png',0)
 	# edges(deep)
 
 	# edges = cv.Canny(img,100,200)
