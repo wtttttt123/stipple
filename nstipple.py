@@ -172,7 +172,7 @@ def error_diffusion(loc,errorxy,R,G0,G1,k,D,img):
 	error0=(Astipple-Apixcel)*k
 	# error0=0
 	# calculate_total weight
-	for i in [x for x in range(-D//2+1,D//2+1) ]:
+	for i in [x for x in range(-D//2+1,D//2+1)]:
 		for j in [y for y in range(-D//2+1,D//2+1)]:
 			if 0<=loc[0]+i<img.shape[0] and 0<=loc[1]+j<img.shape[1] and abs(i)+abs(j)!=0:
 				if (not M[(loc[0]+i,loc[1]+j)]) and (i**2+j**2)**0.5<D/2:
@@ -239,7 +239,7 @@ if __name__== "__main__":
 	plt.axis("off")
 	plt.imshow(new_resolution/255)
 	plt.show()
-	mpimg.imsave('room', new_resolution/255)
+	mpimg.imsave('room2.png', new_resolution/255)
 	
 	# plt.axis("off")
 	# plt.imshow(man255/255)
