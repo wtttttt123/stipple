@@ -216,20 +216,6 @@ if __name__== "__main__":
 	# man = mpimg.imread('man.png')
 	man = mpimg.imread('im7.png')
 	deep = cv.imread('disp7.png',0)
-	# edges(deep)
-
-	# edges = cv.Canny(img,100,200)
-	# z = np.zeros((edges.shape[0],edges.shape[1],3))
-	# for x in range(edges.shape[0]):
-	# 	for y in range(edges.shape[1]):
-	# 		z[x,y,:]=edges[x,y]
-	# return z
-	# plt.subplot(121),plt.imshow(img,cmap = 'gray')
-	# plt.title('Original Image'), plt.xticks([]), plt.yticks([])
-	# plt.subplot(122),plt.imshow(edges,cmap = 'gray')
-	# plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
-	# plt.show()
-
 	man255=man*255
 	M={}
 	dot=2
@@ -241,14 +227,14 @@ if __name__== "__main__":
 	# stippleimg=SAS(5,5,0,7,man255)
 	stippleimg=SASD(5,5,0,7,man255,deep)
 	# stippleimg=SASD(10,10,0,15,man255,depth)
-	new_resolution=np.ones((man255.shape[0]*resolution,man255.shape[1]*resolution,3))*255
+	new_resolution=np.ones((man255.shape[0]*resolution,man255.shape[1]*resolution,4))*255
 	for key, R in stippleimg.items():
 		a,b=key[0],key[1]
-		new_resolution[a*resolution,b*resolution,:]=(0,0,0);
+		new_resolution[a*resolution,b*resolution,:]=(0,0,0,1);
 		for i in range(-int(R*dot),int(R*dot)+1):
 			for j in range(-int(R*dot),int(R*dot)+1):
 				if (i**2+j**2)**0.5<=R*dot:
-					new_resolution[min(new_resolution.shape[0]-1,a*resolution+i),min(new_resolution.shape[1]-1,b*resolution+j),:]=(0,0,0)
+					new_resolution[min(new_resolution.shape[0]-1,a*resolution+i),min(new_resolution.shape[1]-1,b*resolution+j),:]=(0,0,0,1)
 	
 	plt.axis("off")
 	plt.imshow(new_resolution/255)
