@@ -11,7 +11,6 @@ class Stippler():
 
 
 	def __init__(self,output_name,img,deep):
-		# self.parameter=parameter
 		self.output_name=output_name
 		self.dot=2
 		self.resolution=5
@@ -28,39 +27,35 @@ class Stippler():
 		return edge_list
 
 
-	def SASD(self,G0,G1,k,D,img,deep):
-		# G0=self.parameter.Gp
-		# G1=self.parameter.Gn
-		# k=self.parameter.k
-		# D=self.mask_size
-		man255 = mpimg.imread('img8.png')*255
-		deep = cv.imread('disp8.png',0)
-		resdeep = cv.resize(deep,None,fx=640/74, fy=480/55, interpolation = cv.INTER_CUBIC)
-		self.edge_list=self.edge_detection(deep)
-		self.aheap,self.M=self.build_heap_depth(img,self.edge_list)
+	def stippling(self,G0,G1,k,D):
+		self.img = mpimg.imread(self.img)*255
+		self.deep = cv.imread(self.deep,0)
+		self.resdeep = cv.resize(self.deep,None,fx=640/74, fy=480/55, interpolation = cv.INTER_CUBIC)
+		self.edge_list=self.edge_detection(self.resdeep)
+		self.aheap,self.M=self.build_heap_depth()
 		self.stipplelist={}
 		while (self.aheap):
 			pixel=heappop(self.aheap)
 			P,loc,I=pixel[0],pixel[1],pixel[2]
-			if P!=-self.calculate_priority_depth(img[loc[0],loc[1]],loc,self.edge_list):
-					heappush(self.aheap,(-self.calculate_priority_depth(img[loc[0],loc[1]],loc,self.edge_list),loc,img[loc[0],loc[1],0]))
+			if P!=-self.calculate_priority_depth(self.img[loc[0],loc[1]],loc,self.edge_list):
+					heappush(self.aheap,(-self.calculate_priority_depth(self.img[loc[0],loc[1]],loc,self.edge_list),loc,self.img[loc[0],loc[1],0]))
 			else:
 				if not self.M[loc]:
-					R=self.stipple_size_depth_big(deep,loc)
-					R1=self.stipple_size(img,loc)
+					R=self.stipple_size_depth_big(self.resdeep,loc)
+					R1=self.stipple_size(self.img,loc)
 					if I<=128:
 						App=0
 						self.stipplelist[loc]=(R+R1)/2
 					else:
 						App=255
 					errorxy=I-App
-					self.error_diffusion(loc,errorxy,R,G0,G1,k,D,img)
+					self.error_diffusion(loc,errorxy,R,G0,G1,k,D)
 					self.M[loc]=True
 
-		res=self.enlarge(img)		
+		res=self.enlarge()		
 
 
-	def error_diffusion(self,loc,errorxy,R,G0,G1,k,D,img):
+	def error_diffusion(self,loc,errorxy,R,G0,G1,k,D):
 		sxy=self.sh_ex(errorxy,R,G0,G1)
 		wtotal=0
 		Astipple=0
@@ -75,35 +70,33 @@ class Stippler():
 		# calculate_total weight
 		for i in [x for x in range(-D//2+1,D//2+1)]:
 			for j in [y for y in range(-D//2+1,D//2+1)]:
-				if 0<=loc[0]+i<img.shape[0] and 0<=loc[1]+j<img.shape[1] and abs(i)+abs(j)!=0:
+				if 0<=loc[0]+i<self.img.shape[0] and 0<=loc[1]+j<self.img.shape[1] and abs(i)+abs(j)!=0:
 					if (not self.M[(loc[0]+i,loc[1]+j)]) and (i**2+j**2)**0.5<D/2:
 						rmn=(i**2+j**2)**0.5
-						wmn=self.calculate_weight(loc,img,errorxy,rmn,i,j)
+						wmn=self.calculate_weight(loc,errorxy,rmn,i,j)
 						wtotal+=wmn
 		
 		# modifty signle pixel's intensity
 		for i in [x for x in range(-D//2+1,D//2+1)]:
 			for j in[y for y in range(-D//2,D//2+1)]:
-				if 0<=loc[0]+i<img.shape[0] and 0<=loc[1]+j<img.shape[1]and abs(i)+abs(j)!=0:
+				if 0<=loc[0]+i<self.img.shape[0] and 0<=loc[1]+j<self.img.shape[1]and abs(i)+abs(j)!=0:
 					if (not self.M[(loc[0]+i,loc[1]+j)]) and (i**2+j**2)**0.5<D/2:
-						iimn=img[loc[0]+i,loc[1]+j,0]
+						iimn=self.img[loc[0]+i,loc[1]+j,0]
 						rmn=(i**2+j**2)**0.5
-						wmn=self.calculate_weight(loc,img,errorxy,rmn,i,j)
+						wmn=self.calculate_weight(loc,errorxy,rmn,i,j)
 						if wtotal!=0:
 							Nwmn=wmn/wtotal
 							iimn=iimn+Nwmn*(errorxy+error0)*sxy
 							iimn=max(0,min(iimn,255))
-							img[loc[0]+i,loc[1]+j]=(iimn,iimn,iimn)
+							self.img[loc[0]+i,loc[1]+j]=(iimn,iimn,iimn)
 
-		return None
-
-	def build_heap_depth(self,img,edge_list):
+	def build_heap_depth(self):
 		ph=[]
 		M={}
-		for x in range(img.shape[0]):
-			for y in range(img.shape[1]):
-				priority=self.calculate_priority_depth(img[x,y],(x,y),edge_list)
-				heappush(ph,(-priority,(x,y),img[x,y,0]))
+		for x in range(self.img.shape[0]):
+			for y in range(self.img.shape[1]):
+				priority=self.calculate_priority_depth(self.img[x,y],(x,y),self.edge_list)
+				heappush(ph,(-priority,(x,y),self.img[x,y,0]))
 				M[(x,y)]=False
 		return ph,M
 
@@ -139,11 +132,11 @@ class Stippler():
 		size=rmax-((rmax-rmin)*(255-adeep[aloc[0],aloc[1]])/255)
 		return size
 
-	def calculate_weight(self,loc,img,errorxy,rmn,i,j):
+	def calculate_weight(self,loc,errorxy,rmn,i,j):
 		if errorxy>0:
-			wmn=(img[loc[0]+i,loc[1]+j,0])/(rmn**2)
+			wmn=(self.img[loc[0]+i,loc[1]+j,0])/(rmn**2)
 		else:
-			wmn=(255-img[loc[0]+i,loc[1]+j,0])/(rmn**2)
+			wmn=(255-self.img[loc[0]+i,loc[1]+j,0])/(rmn**2)
 		return wmn
 
 
@@ -155,11 +148,8 @@ class Stippler():
 		return sxy
 
 
-	def enlarge(self,img):
-		# dot=self.dot
-		# resolution=self.resolution
-		# output_name=self.output_name
-		self.new_resolution=np.ones((img.shape[0]*self.resolution,img.shape[1]*self.resolution,3))*255
+	def enlarge(self):
+		self.new_resolution=np.ones((self.img.shape[0]*self.resolution,self.img.shape[1]*self.resolution,3))*255
 		for key, R in self.stipplelist.items():
 			a,b=key[0],key[1]
 			self.new_resolution[a*self.resolution,b*self.resolution,:]=(0,0,0);
@@ -167,19 +157,10 @@ class Stippler():
 				for j in range(-int(R*self.dot),int(R*self.dot)+1):
 					if (i**2+j**2)**0.5<=R*self.dot:
 						self.new_resolution[min(self.new_resolution.shape[0]-1,a*self.resolution+i),min(self.new_resolution.shape[1]-1,b*self.resolution+j),:]=(0,0,0)
-		mpimg.imsave(self.output_name, self.new_resolution/255)
-		return None
+		mpimg.imsave("./test/"+self.output_name, self.new_resolution/255)
 
 if __name__== "__main__":
-	man255 = mpimg.imread('img8.png')*255
-	deep = cv.imread('disp8.png',0)
-	resdeep = cv.resize(deep,None,fx=640/74, fy=480/55, interpolation = cv.INTER_CUBIC)
-	stippler1=Stippler("OO2");
-	stippler1.SASD(5,5,0,7,man255,resdeep)
-	# stippleimg=SASD(10,10,0,15,man255,depth)
+	stippler1=Stippler("OO5.png",'img8.png','disp8.png');
+	stippler1.stippling(5,5,0,7)
+	# stippler1.stippling(10,10,0,15)
 
-	
-	# plt.axis("off")
-	# plt.imshow(new_resolution/255)
-	# plt.show()
-	# 
