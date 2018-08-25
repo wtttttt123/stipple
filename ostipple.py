@@ -8,34 +8,6 @@ import cv2 as cv
 
 
 
-def build_heap(img):
-	h=[]
-	for x in range(img.shape[0]):
-		for y in range(img.shape[1]):
-			heappush(h,(-calculate_priority(img[x,y]),(x,y),img[x,y,0]))
-			M[(x,y)]=False
-	return h
-
-def calculate_priority(pixel):
-	if abs(255-pixel[0])>abs(pixel[0]):
-		priority=255-pixel[0]
-	else:
-		priority=pixel[0]
-	return priority
-
-
-# def build_heap_depth1(img,edges):
-# 	h=[]
-# 	for x in range(img.shape[0]):
-# 		for y in range(img.shape[1]):
-# 			if edges[x,y]==255:
-# 				heappush(h,(-300,(x,y),img[x,y,0]))
-# 			else:
-# 				heappush(h,(-calculate_priority_depth(img,x,y,edges),(x,y),img[x,y,0]))
-# 			M[(x,y)]=False
-# 	return h
-
-
 def build_heap_depth(img,edge_list):
 	h=[]
 	for x in range(img.shape[0]):
@@ -57,31 +29,6 @@ def calculate_priority_depth(pixel,loc,edge_list):
 			priority=pixel[0]
 	return priority
 
-
-# def edges(img):
-# 	edges = cv.Canny(img,100,200)
-# 	z = np.zeros((edges.shape[0],edges.shape[1],3))
-# 	for x in range(edges.shape[0]):
-# 		for y in range(edges.shape[1]):
-# 			z[x,y,:]=edges[x,y]
-# 	return z
-# 	plt.subplot(121),plt.imshow(img,cmap = 'gray')
-# 	plt.title('Original Image'), plt.xticks([]), plt.yticks([])
-# 	plt.subplot(122),plt.imshow(edges,cmap = 'gray')
-# 	plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
-# 	plt.show()
-
-
-# def edge_heap(depth_map):
-# 	eimg=edges(depth_map)
-# 	eh=[]
-# 	for x in range(eimg.shape[0]):
-# 		for y in range(eimg.shape[1]):
-# 			heappush(eh,(-eimg[x,y,0],(x,y),eimg[x,y,0]))
-# 			M[(x,y)]=False
-# 	return eh
-
-
 def stipple_size(aimg,aloc):
 	rmax=2
 	rmin=1
@@ -102,11 +49,7 @@ def stipple_size_depth_big(adeep,aloc):
 	size=rmax-((rmax-rmin)*(255-adeep[aloc[0],aloc[1]])/255)
 	return size
 
-# def stipple_size_depth_big_intensity(adeep,aloc):
-# 	rmax=2
-# 	rmin=1
-# 	size=rmax-((rmax-rmin)*(255-adeep[aloc[0],aloc[1]])/255)
-# 	return size
+
 
 def SASD(G0,G1,k,D,img,deep):
 	edge_list=[]
@@ -135,30 +78,6 @@ def SASD(G0,G1,k,D,img,deep):
 				error_diffusion(loc,errorxy,R,G0,G1,k,D,img)
 				M[loc]=True
 	return stipplelist
-
-
-def SAS(G0,G1,k,D,img):
-	aheap=build_heap(img)
-	stipplelist={}
-	while (aheap):
-		pixel=heappop(aheap)
-		P,loc,I=pixel[0],pixel[1],pixel[2]
-		if P!=-calculate_priority(img[loc[0],loc[1]]):
-			heappush(aheap,(-calculate_priority(img[loc[0],loc[1]]),loc,img[loc[0],loc[1],0]))
-		else:
-			if not M[loc]:
-				R=stipple_size(img,loc)
-				if I<=128:
-					App=0
-					stipplelist[loc]=R
-				else:
-					App=255
-				errorxy=I-App
-				error_diffusion(loc,errorxy,R,G0,G1,k,D,img)
-				M[loc]=True
-	return stipplelist
-
-
 
 def error_diffusion(loc,errorxy,R,G0,G1,k,D,img):
 	sxy=sh_ex(errorxy,R,G0,G1)
@@ -211,7 +130,8 @@ def sh_ex(errorxy,Rsize,Gamma0,Gamma1):
 		sxy=(Rsize)**Gamma1
 	return sxy
 
-  
+
+
 if __name__== "__main__":
 	# man = mpimg.imread('man.png')
 	man = mpimg.imread('img8.png')
@@ -242,9 +162,3 @@ if __name__== "__main__":
 	plt.imshow(new_resolution/255)
 	plt.show()
 	mpimg.imsave('room3.png', new_resolution/255)
-	
-	# plt.axis("off")
-	# plt.imshow(man255/255)
-	# plt.show()
-	# mpimg.imsave('255_man', man255/255)
-
