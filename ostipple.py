@@ -47,7 +47,9 @@ class Stippler():
 					errorxy=I-App
 					error_diffusion(loc,errorxy,R,G0,G1,k,D,img)
 					M[loc]=True
-		return stipplelist
+
+		resize(stipplelist)
+		# return stipplelist
 
 		def error_diffusion(loc,errorxy,R,G0,G1,k,D,img):
 			sxy=sh_ex(errorxy,R,G0,G1)
