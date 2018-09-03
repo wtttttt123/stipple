@@ -213,22 +213,25 @@ def sh_ex(errorxy,Rsize,Gamma0,Gamma1):
 
   
 if __name__== "__main__":
-	# man = mpimg.imread('man.png')
-	man = mpimg.imread('img8.png')
-	deep = cv.imread('disp8.png',0)
-	res = cv.resize(deep,None,fx=640/74, fy=480/55, interpolation = cv.INTER_CUBIC)
-	print(res.shape[0])
+	man = mpimg.imread('00467_img.png')
+	# edges = mpimg.imread('01444ee.png')
+	# for x in range(edges.shape[0]):
+	# 	for y in range(edges.shape[1]):
+	# 		 print(edges[x,y])
+	# deep = cv.imread('disp8.png',0)
+	# res = cv.resize(deep,None,fx=640/74, fy=480/55, interpolation = cv.INTER_CUBIC)
+	# print(res.shape[0])
 	man255=man*255
 	M={}
 	dot=2
 	resolution=5
 
-	# man255=np.maximum(z, man255)
-	# plt.imshow(man255/255)
-	# plt.show()
-	# stippleimg=SAS(5,5,0,7,man255)
-	stippleimg=SASD(5,5,0,7,man255,res)
-	# stippleimg=SASD(10,10,0,15,man255,depth)
+	# # man255=np.maximum(z, man255)
+	# # plt.imshow(man255/255)
+	# # plt.show()
+	stippleimg=SAS(5,5,0,7,man255)
+	# # stippleimg=SASD(5,5,0,7,man255,res)
+	# # stippleimg=SASD(10,10,0,15,man255,depth)
 	new_resolution=np.ones((man255.shape[0]*resolution,man255.shape[1]*resolution,3))*255
 	for key, R in stippleimg.items():
 		a,b=key[0],key[1]
@@ -241,10 +244,13 @@ if __name__== "__main__":
 	plt.axis("off")
 	plt.imshow(new_resolution/255)
 	plt.show()
-	mpimg.imsave('room3.png', new_resolution/255)
+	mpimg.imsave('01444.png', new_resolution/255)
 	
 	# plt.axis("off")
 	# plt.imshow(man255/255)
 	# plt.show()
 	# mpimg.imsave('255_man', man255/255)
 
+		#plt.axis("off")
+		#plt.imshow(edges,cmap = 'gray')
+		#plt.show()
